@@ -14,7 +14,7 @@ GMainLoop *loop;
 
 
 static gboolean
-message_handler (GstBus * bus, GstMessage * message, gpointer data)
+message_handler (GstBus * bus, GstMessage * message, gpointer timer)
 {
 
     if (message->type == GST_MESSAGE_ELEMENT) {
@@ -67,16 +67,17 @@ message_handler (GstBus * bus, GstMessage * message, gpointer data)
                 rms = pow (10, rms_dB / 20);
                 g_print ("    normalized rms value: %f\n", rms);
 
-                float vol_value;
+                
+                #define TIME_VOLUME_OFF_SEC (1)
                 GstElement* volume = gst_bin_get_by_name (GST_BIN (pipeline), "volumecontrol");
                 g_assert(volume);
-                if (rms > 0.1) {
-                    vol_value = 0.1;
-                } else {
-                    vol_value = 1.0;
+               
+                if (rms > 0.2) {
+                    g_timer_start (timer);
+                    g_object_set(volume, "volume", 0.2, NULL);
+                } else if (g_timer_elapsed (timer, NULL) > TIME_VOLUME_OFF_SEC ) {
+                    g_object_set(volume, "volume", 1.0, NULL);
                 }
-                g_object_set(volume, "volume", vol_value, NULL);
-
             }
         }
     }
@@ -112,7 +113,7 @@ main (int argc, char** argv)
         "   ! mix.                                          \n"
         "                                                   \n"        
         " alsasrc device="MICROPHONE"                       \n" 
-        "   ! level post-messages=TRUE name=level interval=10000000          \n"
+        "   ! level post-messages=TRUE name=level interval=1000000          \n"
         "   ! fakesink                                          \n"
         "                                                   \n"        
         " audiomixer name=mix                               \n"
@@ -128,8 +129,10 @@ main (int argc, char** argv)
 
     printf("%s", pipe_desc);
 
+
+    GTimer* timer = g_timer_new ();
     bus = gst_element_get_bus (pipeline);
-    watch_id = gst_bus_add_watch (bus, message_handler, NULL);
+    watch_id = gst_bus_add_watch (bus, message_handler, timer);
 
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 

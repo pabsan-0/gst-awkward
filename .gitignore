@@ -1,2 +1,5 @@
 .vscode
 *.o
+*_old.mp3
+
+*.ign.*
