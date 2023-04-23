@@ -8,7 +8,7 @@ A small gstreamer application that plays music, but shuts up whenever someone sp
     - Gstreamer
     - Alsa-utils [optional]: `apt install alsa-utils`
     - Gnuplot [optional]: `apt install gnuplot`
-- Clone this repo `git clone`
+- Clone this repo `git clone https://github.com/pabsan-0/gst-awkward`
 - Set your device configuration in the `src/main.c` `#define`s
 - Build the tool: `make`
 - Run the app with `./main.o`
@@ -33,14 +33,13 @@ Find some samples in `demos/` that were used to figure out how to do the things.
   - `x`: Card
   - `y`: Device
   - `z`: Subdevice
-
 - Gstreamer elements:
     - `alsasink`, `alsasrc`: Advanced Linux Sound Architecture
     - `audioconvert`
     - `volume`, `level`: for setting/reading levels
     - `decodebin`, `autovideosink`, `autovideosrc`
 
-- Useful snippets:
+## Snippets:
 ```
 # Playing audio file in a loop
 gst-launch-1.0 multifilesrc loop=1 location=media/short.mp3 ! decodebin ! audioconvert ! alsasink
