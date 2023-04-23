@@ -63,6 +63,18 @@ cmake, Makefile
 .editorconf
 settings.ini glib
 
+Runtime dependencies of programs:
+
+$ ldd ./main.o
+        libgstreamer-1.0.so.0 => /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0 (0x00007f375de2b000)
+        ...
+$ apt-file search libgstreamer-1.0.so.0
+libgstreamer1.0-0: /usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+libgstreamer1.0-0: /usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so.0.2001.0
+libgstreamer1.0-0: /usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so.0.2003.0
+libgstreamer1.0-dev: /usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so.0.2001.0-gdb.py
+libgstreamer1.0-dev: /usr/share/gdb/auto-load/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so.0.2003.0-gdb.py
+
 ```
 # GST_DELAY 10^6
 GST_DELAY (){
