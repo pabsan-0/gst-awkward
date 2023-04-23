@@ -2,6 +2,28 @@
 
 A small gstreamer application that plays music, but shuts up whenever someone speaks. Quit awkward silences today!
 
+## Usage
+
+- Match dependencies:
+    - Gstreamer
+    - Alsa-utils [optional]: `apt install alsa-utils`
+    - Gnuplot [optional]: `apt install gnuplot`
+- Clone this repo `git clone`
+- Set your device configuration in the `src/main.c` `#define`s
+- Build the tool: `make`
+- Run the app with `./main.o`
+
+## Demos
+
+Find some samples in `demos/` that were used to figure out how to do the things.
+
+- `gstlevel.c`: A demo pipeline of the gstreamer `level` plugin, taken from its documentation. 
+- `gnuplot.c`: A very basic `gnuplot` demo from stdin.
+- `gstlevel_plots_stdin.c`: Gstreamer audio pipe with its rms value being plotted.
+- `gstlevel_plot_buffer.c`: Gstreamer audio pipe with its rms, peak and decay values being plotted. Can be used to further understand the parameters of the `level` plugin (see `gst-inspect-1.0 level`).
+
+
+
 ## The audio essentials
 
 - Audio loopback `sudo modprobe snd-aloop`
@@ -18,9 +40,7 @@ A small gstreamer application that plays music, but shuts up whenever someone sp
     - `volume`, `level`: for setting/reading levels
     - `decodebin`, `autovideosink`, `autovideosrc`
 
-
-## Snippets
-
+- Useful snippets:
 ```
 # Playing audio file in a loop
 gst-launch-1.0 multifilesrc loop=1 location=media/short.mp3 ! decodebin ! audioconvert ! alsasink
@@ -53,7 +73,7 @@ gst-launch-1.0 alsasrc device="hw:3,0,0" ! volume volume=1.5 ! level message=TRU
 
 cmake, Makefile
 .editorconf
-
+settings.ini glib
 
 ```
 # GST_DELAY 10^6

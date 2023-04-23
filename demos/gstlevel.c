@@ -79,29 +79,6 @@ main (int argc, char *argv[])
 
     gst_init (&argc, &argv);
 
-    /*
-    #define MEDIASRC "media/short.mp3"
-
-    #define LOOPBACK_SRC "hw:3,0,0"
-    #define LOOPBACK_SINK "hw:3,0,0"
-
-    #define MICROPHONE "hw:2,0,0"
-    #define SPEAKERS   "hw:3,0,0" // must default to 'default'
-   
-    " filesrc location="MEDIASRC"                   "
-    "   ! volume name=volumecontrol volume=1.5      "
-    "   ! mix.                                      "
-    " alsasrc device="MICROPHONE"                   "
-    "   ! level name=level_microphone               "
-    "   ! mix.                                      "
-    "   
-    ! alsasink device="LOOPBACK_SRC"            " // select this in teams
-    "                                               "        
-    " alsasrc device="LOOPBACK_SINK"                " // select this in teams
-    "   ! level name=level_incoming message=TRUE     "
-    "   ! alsasink device="SPEAKERS"                "
-    */
-
     caps = gst_caps_from_string ("audio/x-raw,channels=2");
 
     pipeline = gst_pipeline_new (NULL);
