@@ -16,13 +16,14 @@ GMainLoop *loop;
 // Declarations towards plotting
 #define NUMEL (1000)
 FILE *gnuplot;
+gdouble arr_time[NUMEL];
 int arr_rms[NUMEL];
 int arr_peak[NUMEL];
 int arr_decay[NUMEL];
 
 
 static gboolean
-message_handler (GstBus * bus, GstMessage * message, gpointer u_data)
+message_handler (GstBus * bus, GstMessage * message, gpointer timer)
 {
 
     if (message->type == GST_MESSAGE_ELEMENT) {
@@ -78,11 +79,13 @@ message_handler (GstBus * bus, GstMessage * message, gpointer u_data)
 
                 // Plotting via gnuplot
                 // Using a gnuplot buffer variable to avoid repiping all data
+                gdouble current_time_sec = g_timer_elapsed (timer, NULL);
                 fprintf(gnuplot, "$BUFFER <<EOD\n");
                 for (int i = 0; i < NUMEL; i++) {
 
                     // Add data point to gnuplot buffer
-                    fprintf(gnuplot, "%d %d %d\n", 
+                    fprintf(gnuplot, "%f %d %d %d\n", 
+                        arr_time[i],
                         arr_rms[i],
                         arr_peak[i],
                         arr_decay[i]
@@ -90,22 +93,24 @@ message_handler (GstBus * bus, GstMessage * message, gpointer u_data)
 
                     // Shift value for next iteration and get new value for most recent time
                     if (i+1 < NUMEL) {
+                        arr_time[i]  = arr_time[i+1];
                         arr_rms[i]   = arr_rms[i+1];
                         arr_peak[i]  = arr_peak[i+1];
                         arr_decay[i] = arr_decay[i+1];
                     } else {
                         // dB to range 0.0-1.0 then times 100 to store as int
+                        arr_time[i]  = current_time_sec;
                         arr_rms[i]   = pow (10, rms_dB / 20) * 100; 
                         arr_peak[i]  = pow (10, peak_dB / 20) * 100; 
                         arr_decay[i] = pow (10, decay_dB / 20) * 100; 
                     } 
                 }
                 fprintf(gnuplot, "EOD\n");
-                fprintf(gnuplot, "set xrange [-1:1001] \n");
+                fprintf(gnuplot, "set xrange [%f:%f] \n", arr_time[0], arr_time[NUMEL-1]);
                 fprintf(gnuplot, "set yrange [-1:101] \n");
-                fprintf(gnuplot, "plot $BUFFER u 0:1 w l t 'rms',   "
-                                 "          '' u 0:2 w l t 'peak',  "
-                                 "          '' u 0:3 w l t 'decay'\n"
+                fprintf(gnuplot, "plot $BUFFER u 1:2 w l t 'rms',   "
+                                 "          '' u 1:3 w l t 'peak',  "
+                                 "          '' u 1:4 w l t 'decay'\n"
                 );
                 fflush(gnuplot);
             }
@@ -142,13 +147,16 @@ main (int argc, char** argv)
     // Initializing the plotting pipe and buffers
     gnuplot = popen("gnuplot", "w");
     for (int i = 0; i < NUMEL; i++) {
+        arr_time[i] = 0.0;
         arr_rms[i] = 0;
         arr_peak[i] = 0;
         arr_decay[i] = 0;
     }
 
+    // g_timer_start implicitly called
+    GTimer* timer = g_timer_new ();
     bus = gst_element_get_bus (pipeline);
-    watch_id = gst_bus_add_watch (bus, message_handler, NULL);
+    watch_id = gst_bus_add_watch (bus, message_handler, timer);
 
     gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
